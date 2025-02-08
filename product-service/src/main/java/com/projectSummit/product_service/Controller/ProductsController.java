@@ -26,8 +26,6 @@ public class ProductsController {
         this.productsService = productsService;
     }
 
-
-
     @GetMapping
     public ResponseEntity<List<ProductResponseDTO>> getProducts(
             @RequestParam String type,
@@ -43,20 +41,20 @@ public class ProductsController {
     }
 
     @GetMapping("/{prodId}")
-    public Product getProductById(@PathVariable Long prodId) {
+    public Product getProductById(@PathVariable int prodId) {
 
         return productsService.getProductById(prodId);
     }
 
     @DeleteMapping("/{prodId}")
-    public void deleteProduct(@PathVariable Long prodId) {
+    public void deleteProduct(@PathVariable int prodId) {
 
         productsService.removeProduct(prodId);
     }
 
     @PatchMapping("/{prodId}")
     public ResponseEntity<Product> updateProductStatus(
-            @PathVariable Long prodId,
+            @PathVariable int prodId,
             @RequestBody String status) {
 
         Product updatedProduct = productsService.updateProductStatus(prodId, status);

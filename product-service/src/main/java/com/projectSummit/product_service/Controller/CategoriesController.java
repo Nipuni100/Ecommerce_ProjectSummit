@@ -32,7 +32,7 @@ public class CategoriesController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
-    @DeleteMapping("/{categId}")
+    @DeleteMapping("/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
         boolean isDeleted = productsService.deleteCategory(categoryId);
         if (isDeleted) {
@@ -43,13 +43,13 @@ public class CategoriesController {
     }
 
     @PutMapping("/{categoryId}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Long categoryId, @RequestBody Category category) {
+    public ResponseEntity<Category> updateCategory(@PathVariable int categoryId, @RequestBody Category category) {
         Category updatedCategory = productsService.updateCategory(categoryId, category);
 
         if (updatedCategory != null) {
-            return ResponseEntity.ok(updatedCategory); // Return updated category
+            return ResponseEntity.ok(updatedCategory);
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Category not found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 

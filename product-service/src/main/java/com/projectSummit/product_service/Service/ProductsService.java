@@ -35,17 +35,17 @@ public class ProductsService implements ProductsServiceInterface {
     ProductResponseDTO productResponseDTO = modelMapper.map(product, ProductResponseDTO.class);
     ProductRequestDTO productRequestDTO = modelMapper.map(product, ProductRequestDTO.class);
 
-    public Product getProductById(Long prodId) {
-        return productsRepository.findById(prodId)
+    public Product getProductById(int prodId) {
+        return productsRepository.findById((long)prodId)
                 .orElseThrow(() -> new NoSuchElementException("Product with ID " + prodId + " not found"));
     }
 
-    public void removeProduct(Long prodId) {
-        boolean exists = productsRepository.existsById(prodId);
+    public void removeProduct(int prodId) {
+        boolean exists = productsRepository.existsById((long)prodId);
         if (!exists) {
             throw new IllegalStateException("Product with id " + prodId + " does not exist!");
         }
-        productsRepository.deleteById(prodId);
+        productsRepository.deleteById((long)prodId);
 
     }
 
@@ -96,7 +96,7 @@ public class ProductsService implements ProductsServiceInterface {
     }
 
 
-    public Category updateCategory(Long categoryId, Category category) {
+    public Category updateCategory(int categoryId, Category category) {
         if (categoryRepository.existsById(categoryId)) {
 //            category.setCategoryId(categoryId);
             return categoryRepository.save(category);
@@ -110,8 +110,8 @@ public class ProductsService implements ProductsServiceInterface {
     }
 
 
-    public Product updateProductStatus(Long prodId, String status) {
-        return productsRepository.findById(prodId).map(product -> {
+    public Product updateProductStatus(int prodId, String status) {
+        return productsRepository.findById((long)prodId).map(product -> {
             product.setStatus(status);
             return productsRepository.save(product);
         }).orElse(null);
