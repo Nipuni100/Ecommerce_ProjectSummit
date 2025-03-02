@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 @Getter
 @Setter
 @Entity
-@Table(name="product")
+@Table
 public class Product {
 
     @Id
@@ -17,14 +17,7 @@ public class Product {
     private int prodId;
     private String prodName;
     private String brand;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id", insertable = false, updatable = false)
-    private Category category;
-
-    @Column(name = "category_id", nullable = false)
     private int categoryId;
-
     private int supplierId;
     private Float price;
     private int stockCount;
@@ -54,4 +47,14 @@ public class Product {
         this.status = status;
     }
 
+    public Product(int prodId, String prodName, String brand, int stockCount, Float price) {
+        this.prodId = prodId;
+        this.prodName = prodName;
+        this.brand = brand;
+        this.stockCount = stockCount;
+        this.price = price;
+    }
+
+    public Product(int i, String s, String brand, Float price, int i1, Object o) {
+    }
 }

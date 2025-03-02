@@ -7,13 +7,9 @@ public record ProductRequestDTO (
         @NonNull
         int prodId,
         String prodName,
-        Float Price,
+        String brand,
+        Float price,
         @Nullable
-        int StkCount,
-        String brand
-){
+        int stockCount
 
-
-
-
-}
+){}

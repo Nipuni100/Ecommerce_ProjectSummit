@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 @Getter
 @Setter
 @Entity
-@Table(name="category")
+@Table
 public class Category {
     @Id
     @GeneratedValue(
