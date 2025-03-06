@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping(path="/api/v1/carts")
 public class CartsController {
@@ -26,17 +27,17 @@ public class CartsController {
         return ResponseEntity.ok(cartsService.getAllCarts());
     }
 
-    @GetMapping("{/cartId}")
+    @GetMapping("/{cartId}")
     public ResponseEntity<Cart> getCartById(@PathVariable Long cartId) {
         return cartsService.getOrderById(cartId);
 
     }
 
-    @PostMapping("{/cartId}/Items")
-    public ResponseEntity<CartItem> addItemToCart(@PathVariable Long cartId, @RequestBody CartItem cartItem) {
-        CartItem savedcartItem = cartsService.addcartItem(cartItem);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedcartItem);
-    }
+//    @PostMapping("{/cartId}/Items")
+//    public ResponseEntity<CartItem> addItemToCart(@PathVariable Long cartId, @RequestBody CartItem cartItem) {
+//        CartItem savedcartItem = cartsService.addcartItem(cartItem);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(savedcartItem);
+//    }
 
 
 }

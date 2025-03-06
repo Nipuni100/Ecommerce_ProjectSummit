@@ -33,9 +33,8 @@ public class CartsService {
         return ResponseEntity.notFound().build();
     }
 
-
-    public CartItem addcartItem(CartItem cartItem) {
-        cartsRepository.save(cartItem);
-        return cartItem;
-    }
+//    public CartItem addcartItem(CartItem cartItem) {
+//        cartsRepository.save(cartItem);
+//        return cartItem;
+//    }
 }
