@@ -6,7 +6,6 @@ import com.projectSummit.product_service.DTOs.ProductStatusDTO;
 import com.projectSummit.product_service.Entity.Category;
 import com.projectSummit.product_service.Entity.Product;
 import com.projectSummit.product_service.Service.ProductsService;
-//import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
