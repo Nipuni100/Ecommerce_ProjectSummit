@@ -1,29 +1,29 @@
 package com.projectSummit.product_service.Controller;
 
+import com.projectSummit.product_service.DTOs.CategoryRequestDTO;
+import com.projectSummit.product_service.DTOs.CategoryResponseDTO;
 import com.projectSummit.product_service.Entity.Category;
 import com.projectSummit.product_service.Entity.Product;
 import com.projectSummit.product_service.Service.ProductsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-//import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path="/api/v1/categories")
+@RequiredArgsConstructor
 public class CategoriesController {
 
     private final ProductsService productsService;
 
-    @Autowired
-    public CategoriesController(ProductsService productsService) {
-        this.productsService = productsService;
-    }
-
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(productsService.getAllCategories());
+    public ResponseEntity<List<CategoryResponseDTO>> getAllCategories() {
+        List<CategoryResponseDTO> categoryResponseDTOs = productsService.getAllCategories();
+        return ResponseEntity.ok(categoryResponseDTOs); // Return the list of DTOs
     }
 
     @PostMapping
@@ -32,8 +32,18 @@ public class CategoriesController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
     }
 
+    @GetMapping("/{categoryId}") // Get category by categoryId
+    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable int categoryId) {
+        CategoryResponseDTO categoryResponseDTO = productsService.getCategoryById(categoryId);
+        if (categoryResponseDTO != null) {
+            return ResponseEntity.ok(categoryResponseDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @DeleteMapping("/{categoryId}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<String> deleteCategory(@PathVariable int categoryId) {
         boolean isDeleted = productsService.deleteCategory(categoryId);
         if (isDeleted) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Category deleted successfully");
@@ -43,8 +53,8 @@ public class CategoriesController {
     }
 
     @PutMapping("/{categoryId}")
-    public ResponseEntity<Category> updateCategory(@PathVariable int categoryId, @RequestBody Category category) {
-        Category updatedCategory = productsService.updateCategory(categoryId, category);
+    public ResponseEntity<CategoryResponseDTO> updateCategory(@PathVariable int categoryId, @RequestBody CategoryRequestDTO categoryRequestDTO) {
+        CategoryResponseDTO updatedCategory = productsService.updateCategory(categoryId, categoryRequestDTO);
 
         if (updatedCategory != null) {
             return ResponseEntity.ok(updatedCategory);

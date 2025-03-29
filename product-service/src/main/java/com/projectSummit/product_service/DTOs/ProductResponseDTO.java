@@ -11,10 +11,14 @@ public record ProductResponseDTO (
         @NonNull
         int prodId,
         String prodName,
-        Float Price,
+        Float price,
         @Nullable
-        int StkCount
+        int stockCount
 ){
-
-
+        public ProductResponseDTO(int prodId, String prodName, Float price, int stockCount) {
+                this.prodId = prodId;
+                this.prodName = prodName;
+                this.price = price;
+                this.stockCount = stockCount;
+        }
 }

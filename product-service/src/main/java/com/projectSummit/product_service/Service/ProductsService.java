@@ -1,39 +1,60 @@
 package com.projectSummit.product_service.Service;
 
+
+import com.projectSummit.product_service.DTOs.CategoryRequestDTO;
+import com.projectSummit.product_service.DTOs.CategoryResponseDTO;
 import com.projectSummit.product_service.DTOs.ProductRequestDTO;
 import com.projectSummit.product_service.DTOs.ProductResponseDTO;
 import com.projectSummit.product_service.Entity.Category;
 import com.projectSummit.product_service.Entity.Product;
+import com.projectSummit.product_service.Mappers.CategoryResponseDTOMapper;
+import com.projectSummit.product_service.Mappers.ProductRequestDTOMapper;
+import com.projectSummit.product_service.Mappers.ProductResponseDTOMapper;
 import com.projectSummit.product_service.Repository.CategoryRepository;
 import com.projectSummit.product_service.Repository.ProductsRepository;
-import org.modelmapper.ModelMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class ProductsService implements ProductsServiceInterface {
     private final ProductsRepository productsRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductResponseDTOMapper productResponseDTOMapper;
+    private final ProductRequestDTOMapper productRequestDTOMapper;
+    private final CategoryResponseDTOMapper categoryResponseDTOMapper;
 
-    @Autowired
-    public ProductsService(ProductsRepository productsRepository, CategoryRepository categoryRepository,ModelMapper modelMapper) {
-        this.productsRepository = productsRepository;
-        this.categoryRepository = categoryRepository;
-        this.modelMapper = modelMapper;
+    //Methods
+
+    public List<ProductResponseDTO> getProducts(String type, String searchQuery) {
+        List<Product> products;
+        if ("product".equalsIgnoreCase(type)) {
+            products = productsRepository.findByProdName(searchQuery);
+        } else if ("category".equalsIgnoreCase(type)) {
+            Category category = categoryRepository.findByCategoryName(searchQuery);  //Return CategoryId
+            if (category != null) {
+                int categoryId = category.getCategoryId();
+                products = productsRepository.findByCategoryId(categoryId); // Fetch products using categoryId
+            } else {
+                products = new ArrayList<>();
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid search type. Use 'product' or 'category'.");
+        }
+
+        return products
+                .stream()
+                .map(productResponseDTOMapper)
+                .collect(Collectors.toList());
     }
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    Product product = new Product();
-    Category category = new Category();
-    ProductResponseDTO productResponseDTO = modelMapper.map(product, ProductResponseDTO.class);
-    ProductRequestDTO productRequestDTO = modelMapper.map(product, ProductRequestDTO.class);
 
     public Product getProductById(int prodId) {
         return productsRepository.findById((long)prodId)
@@ -49,71 +70,70 @@ public class ProductsService implements ProductsServiceInterface {
 
     }
 
-//    public Page<Product> getProductByName(String prodName, Pageable pageable) {
-//        return productsRepository.findByNameContaining(prodName, pageable);
-//    }
-    public List<ProductResponseDTO> getProduct(String type, String searchQuery) {
-//        Check the type as well, category or product
-//        if category this elif this
-        List<Product> products;
 
-        if ("product".equalsIgnoreCase(type)) {
-            // Search by product name
-            products = productsRepository.findByProdName(searchQuery);
-        } else if ("category".equalsIgnoreCase(type)) {
-            // Search by category name
-            Category category = categoryRepository.findByCategoryName(searchQuery);
-            products = (category != null) ? productsRepository.findByCategory(category) : new ArrayList<>();
-        } else {
-            throw new IllegalArgumentException("Invalid search type. Use 'product' or 'category'.");
+    public ProductResponseDTO addProduct(ProductRequestDTO productRequestDTO) {
+        Product product = productRequestDTOMapper.apply(productRequestDTO);
+        Product savedProduct = productsRepository.save(product);
+        return productResponseDTOMapper.apply(savedProduct);
+    }
+
+
+    public Product updateProductStatus(int prodId, String status) {
+        Optional<Product> optionalProduct = productsRepository.findById((long)prodId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            product.setStatus(status);
+            return productsRepository.save(product);
         }
+        return null;
+    }
 
-
-        return products
-                .stream()
-                .map(product ->productResponseDTO)
+    public List<CategoryResponseDTO> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream()
+                .map(categoryResponseDTOMapper)
                 .collect(Collectors.toList());
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+
+    public CategoryResponseDTO getCategoryById(int categoryId)
+    {
+        Optional<Category> categoryOptional = categoryRepository.findById((long)categoryId);
+        return categoryOptional.map(
+                        categoryResponseDTOMapper)
+                .orElse(null);
     }
 
+
     public Category addNewCategory(Category category) {
-         categoryRepository.save(category);
+        categoryRepository.save(category);
         return category;
     }
 
-
-    public boolean deleteCategory(Long categoryId) {
+    public boolean deleteCategory(int categoryId) {
         if (categoryRepository.existsById(categoryId)) {
-            categoryRepository.deleteById(categoryId);
+            categoryRepository.deleteById((long)categoryId);
             return true;
         } else {
             return false;
-
         }
     }
 
 
-    public Category updateCategory(int categoryId, Category category) {
-        if (categoryRepository.existsById(categoryId)) {
-//            category.setCategoryId(categoryId);
-            return categoryRepository.save(category);
+    public CategoryResponseDTO updateCategory(int categoryId, CategoryRequestDTO categoryRequestDTO) {
+
+        Optional<Category> categoryOptional = categoryRepository.findById((long)categoryId);
+        if (categoryOptional.isPresent()) {
+            Category category = categoryOptional.get();
+            category.setCategoryName(categoryRequestDTO.categoryName());
+            category.setCategoryDescription(categoryRequestDTO.categoryDescription());
+            Category updatedCategory = categoryRepository.save(category);
+
+            return categoryResponseDTOMapper.apply(updatedCategory);
         } else {
             return null;
         }
     }
 
-    public Product addProduct(Product product) {
-        return productsRepository.save(product);
-    }
 
-
-    public Product updateProductStatus(int prodId, String status) {
-        return productsRepository.findById((long)prodId).map(product -> {
-            product.setStatus(status);
-            return productsRepository.save(product);
-        }).orElse(null);
-    }
 }

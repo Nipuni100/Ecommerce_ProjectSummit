@@ -14,12 +14,14 @@ import java.util.Optional;
 @Repository
 public interface ProductsRepository
         extends JpaRepository<Product, Long> {
-    List<Product> findByprodName(String prodName);
+//    List<Product> findByprodName(String prodName);
 
     List<Product> findByProdName(String prodName);
 
-    List<Product> findByCategory(Category category);
-//    Page<Product> findByNameContaining(String prodName, Pageable pageable);
+//    List<Product> findByCategory(String categoryName);
+
+    List<Product> findByCategoryId(int categoryId);
+
 
 }
 

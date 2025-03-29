@@ -1,7 +1,11 @@
 package com.projectsummit.Order_service.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name="orderItems")
 public class OrderItem {
@@ -9,36 +13,45 @@ public class OrderItem {
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
-
-    private Long orderItemId;
+    private int orderItemId;
     private String prodName;
-    private Long price;
-    @ManyToOne
-    @JoinColumn(name = "orderId", nullable = false)
-    private Order order;
+    private Float price;
+    private int quantity;
+    private int orderId;
 
     public OrderItem() {
     }
 
-    public OrderItem(Long orderItemId, String prodName, Long price, Order order) {
+
+    public OrderItem(String prodName, Float price, int quantity, int orderId) {
+        this.prodName = prodName;
+        this.price = price;
+        this.quantity = quantity;
+        this.orderId = orderId;
+    }
+
+    public OrderItem(int orderItemId, String prodName, Float price, int quantity, int orderId) {
         this.orderItemId = orderItemId;
         this.prodName = prodName;
         this.price = price;
-        this.order = order;
+        this.quantity = quantity;
+        this.orderId = orderId;
     }
 
-    public OrderItem(Long price, String prodName, Order order) {
-        this.price = price;
-        this.prodName = prodName;
-        this.order = order;
-    }
-
-    public Long getOrderItemId() {
+    public int getOrderItemId() {
         return orderItemId;
     }
 
-    public void setOrderItemId(Long orderItemId) {
+    public void setOrderItemId(int orderItemId) {
         this.orderItemId = orderItemId;
+    }
+
+    public Float getPrice() {
+        return price;
+    }
+
+    public void setPrice(Float price) {
+        this.price = price;
     }
 
     public String getProdName() {
@@ -49,19 +62,19 @@ public class OrderItem {
         this.prodName = prodName;
     }
 
-    public Long getPrice() {
-        return price;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setPrice(Long price) {
-        this.price = price;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
-    public Order getOrder() {
-        return order;
+    public int getOrderId() {
+        return orderId;
     }
 
-    public void setOrder(Order order) {
-        this.order = order;
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 }

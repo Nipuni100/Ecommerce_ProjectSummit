@@ -1,47 +1,63 @@
 package com.projectsummit.Carts_service.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 
 @Entity
 @Table
+@Setter
+@Getter
 public class CartItem {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
-    private Long cartItemId;
+    private int cartItemId;
+    private int cartId;
     private String prodName;
-    private Integer Price;
+    private Float price;
     private String brand;
-    private Integer Qty;
+    private int quantity;
     private String status;
 
     public CartItem() {
     }
 
-    public CartItem(String prodName, Integer price, String brand, Integer qty, String status) {
+    public CartItem(int cartId, String prodName, Float price, String brand, int quantity, String status) {
+        this.cartId = cartId;
         this.prodName = prodName;
-        Price = price;
+        this.price = price;
         this.brand = brand;
-        Qty = qty;
-        Status = status;
+        this.quantity = quantity;
+        this.status = status;
     }
 
-    public CartItem(Long cartItemId, String prodName, Integer price, String brand, String status, Integer qty) {
+    public CartItem(int cartItemId, int cartId, Float price, String prodName, String brand, int quantity, String status) {
         this.cartItemId = cartItemId;
+        this.cartId = cartId;
+        this.price = price;
         this.prodName = prodName;
-        Price = price;
         this.brand = brand;
-        Status = status;
-        Qty = qty;
+        this.quantity = quantity;
+        this.status = status;
     }
 
-    public Long getCartItemId() {
+    public int getCartItemId() {
         return cartItemId;
     }
 
-    public void setCartItemId(Long cartItemId) {
+    public void setCartItemId(int cartItemId) {
         this.cartItemId = cartItemId;
+    }
+
+    public int getCartId() {
+        return cartId;
+    }
+
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
     }
 
     public String getProdName() {
@@ -52,12 +68,12 @@ public class CartItem {
         this.prodName = prodName;
     }
 
-    public Integer getPrice() {
-        return Price;
+    public Float getPrice() {
+        return price;
     }
 
-    public void setPrice(Integer price) {
-        Price = price;
+    public void setPrice(Float price) {
+        this.price = price;
     }
 
     public String getBrand() {
@@ -68,19 +84,19 @@ public class CartItem {
         this.brand = brand;
     }
 
-    public Integer getQty() {
-        return Qty;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setQty(Integer qty) {
-        Qty = qty;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public String getStatus() {
-        return Status;
+        return status;
     }
 
     public void setStatus(String status) {
-        Status = status;
+        this.status = status;
     }
 }

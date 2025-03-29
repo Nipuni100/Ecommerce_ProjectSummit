@@ -2,10 +2,10 @@ package com.projectSummit.product_service.Controller;
 
 import com.projectSummit.product_service.DTOs.ProductRequestDTO;
 import com.projectSummit.product_service.DTOs.ProductResponseDTO;
+import com.projectSummit.product_service.DTOs.ProductStatusDTO;
 import com.projectSummit.product_service.Entity.Category;
 import com.projectSummit.product_service.Entity.Product;
 import com.projectSummit.product_service.Service.ProductsService;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping(path="/api/v1/products")
@@ -22,48 +23,46 @@ public class ProductsController {
 
     @Autowired
     public ProductsController(ProductsService productsService) {
-
         this.productsService = productsService;
     }
 
-    @GetMapping
+    @GetMapping //Searching for products by category and productName
     public ResponseEntity<List<ProductResponseDTO>> getProducts(
             @RequestParam String type,
             @RequestParam String searchQuery) {
-        List<ProductResponseDTO> products = productsService.getProduct(type, searchQuery);
+        List<ProductResponseDTO> products = productsService.getProducts(type, searchQuery);
         return ResponseEntity.ok(products);
     }
 
-    @PostMapping
-    public ResponseEntity<Product> addProduct(@RequestBody Product product) {
-        Product savedProduct = productsService.addProduct(product);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
+    @PostMapping //Add a product to the inventory
+    public ResponseEntity<ProductResponseDTO> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
+        ProductResponseDTO savedProduct = productsService.addProduct(productRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedProduct);
     }
 
-    @GetMapping("/{prodId}")
+    @GetMapping("/{prodId}") //Get products by prodId
     public Product getProductById(@PathVariable int prodId) {
-
         return productsService.getProductById(prodId);
     }
 
-    @DeleteMapping("/{prodId}")
-    public void deleteProduct(@PathVariable int prodId) {
-
-        productsService.removeProduct(prodId);
+    @DeleteMapping("/{prodId}") //Delete a product
+    public ResponseEntity<String> removeProduct(@PathVariable int prodId) {
+        try {
+            productsService.removeProduct(prodId);
+            return ResponseEntity.ok("Product with ID " + prodId + " deleted successfully.");
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
-    @PatchMapping("/{prodId}")
+    @PatchMapping("/{prodId}") //Change the product Status
     public ResponseEntity<Product> updateProductStatus(
             @PathVariable int prodId,
-            @RequestBody String status) {
-
+            @RequestBody ProductStatusDTO statusDTO)
+    {
+        String status = statusDTO.status().trim();
         Product updatedProduct = productsService.updateProductStatus(prodId, status);
-
-        if (updatedProduct != null) {
-            return ResponseEntity.ok(updatedProduct);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return (updatedProduct != null) ? ResponseEntity.ok(updatedProduct) : ResponseEntity.notFound().build();
     }
 
 }
