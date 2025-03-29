@@ -23,31 +23,31 @@ public class OrdersContoller {
     @GetMapping
     public ResponseEntity<List <OrderResponseDTO>> getAllOrders() {
         List<OrderResponseDTO> orders = ordersService.getAllOrders();
-        return ResponseEntity.ok(ordersService.getAllOrders());
+        return ResponseEntity.ok(orders);
     }
 
-    @GetMapping("/{customId}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long customId) {
-        return ordersService.getOrderById(customId);
+    @GetMapping("/{customerId}")
+    public ResponseEntity<Order> getOrderById(@PathVariable int customerId) {
+        return ordersService.getOrderById((long)customerId);
 
     }
 
-    @PostMapping("/{customId}")
-    public ResponseEntity<Order> createOrder(@PathVariable Long customId, @RequestBody Order order) {
+    @PostMapping("/{customerId}")
+    public ResponseEntity<Order> createOrder(@PathVariable int customerId, @RequestBody Order order) {
         Order savedOrder = ordersService.addOrder(order);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedOrder);
 
     }
 
-    @DeleteMapping("/{customId}/{orderId}")
-    public ResponseEntity<String> cancelOrder(@PathVariable Long customId, @PathVariable Long orderId) {
+    @DeleteMapping("/{customerId}/{orderId}")
+    public ResponseEntity<String> cancelOrder(@PathVariable int customerId, @PathVariable Long orderId) {
         Order order = ordersService.findOrderById(orderId);
 
         if (order == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
         }
 
-        if (!order.getCustomId().equals(customId)) {
+        if (order.getCustomerId() != customerId) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("This order does not belong to the customer");
         }
 

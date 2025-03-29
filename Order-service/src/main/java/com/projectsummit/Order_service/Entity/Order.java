@@ -1,10 +1,14 @@
 package com.projectsummit.Order_service.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
 @Table(name="orders")
 public class Order {
@@ -13,31 +17,22 @@ public class Order {
             strategy = GenerationType.IDENTITY
     )
 
-    private Long orderId;
-    private Long customId;
+    private int orderId;
+    private int customerId;
     private String paymentMethod;
-    private Integer numOfItems;
-    private Integer totalPrice;
+    private int numOfItems;
+    private Float totalPrice;
     private String orderStatus;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> itemsList = new ArrayList<>();
 
     public Order() {
     }
 
-    public Order(Long customId, String paymentMethod, Integer numOfItems, Integer totalPrice, String orderStatus, List<OrderItem> itemsList) {
-        this.customId = customId;
-        this.paymentMethod = paymentMethod;
-        this.numOfItems = numOfItems;
-        this.totalPrice = totalPrice;
-        this.orderStatus = orderStatus;
-        this.itemsList = itemsList;
-    }
-
-    public Order(Long orderId, Long customId, String paymentMethod, Integer numOfItems, Integer totalPrice, String orderStatus, List<OrderItem> itemsList) {
+    public Order(int orderId, int customerId, String paymentMethod, int numOfItems, Float totalPrice, String orderStatus, List<OrderItem> itemsList) {
         this.orderId = orderId;
-        this.customId = customId;
+        this.customerId = customerId;
         this.paymentMethod = paymentMethod;
         this.numOfItems = numOfItems;
         this.totalPrice = totalPrice;
@@ -45,20 +40,29 @@ public class Order {
         this.itemsList = itemsList;
     }
 
-    public Long getOrderId() {
+    public Order(int customerId, String paymentMethod, int numOfItems, Float totalPrice, String orderStatus, List<OrderItem> itemsList) {
+        this.customerId = customerId;
+        this.paymentMethod = paymentMethod;
+        this.numOfItems = numOfItems;
+        this.totalPrice = totalPrice;
+        this.orderStatus = orderStatus;
+        this.itemsList = itemsList;
+    }
+
+    public int getOrderId() {
         return orderId;
     }
 
-    public void setOrderId(Long orderId) {
+    public void setOrderId(int orderId) {
         this.orderId = orderId;
     }
 
-    public Long getCustomId() {
-        return customId;
+    public int getCustomerId() {
+        return customerId;
     }
 
-    public void setCustomId(Long customId) {
-        this.customId = customId;
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
     }
 
     public String getPaymentMethod() {
@@ -69,19 +73,19 @@ public class Order {
         this.paymentMethod = paymentMethod;
     }
 
-    public Integer getNumOfItems() {
+    public int getNumOfItems() {
         return numOfItems;
     }
 
-    public void setNumOfItems(Integer numOfItems) {
+    public void setNumOfItems(int numOfItems) {
         this.numOfItems = numOfItems;
     }
 
-    public Integer getTotalPrice() {
+    public Float getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(Integer totalPrice) {
+    public void setTotalPrice(Float totalPrice) {
         this.totalPrice = totalPrice;
     }
 
@@ -101,3 +105,5 @@ public class Order {
         this.itemsList = itemsList;
     }
 }
+
+

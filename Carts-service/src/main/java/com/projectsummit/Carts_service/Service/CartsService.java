@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class CartsService {
     private final CartItemRepository cartItemRepository;
     private CartsRepository cartsRepository;
-//    private CartResponseDTOMapper cartResponseDTOMapper;
     private CartItemResponseDTOMapper cartItemResponseDTOMapper;
 
     @Autowired
@@ -33,14 +32,6 @@ public class CartsService {
         this.cartsRepository = cartsRepository;
         this.cartItemRepository = cartItemRepository;
     }
-
-
-//    public <List<CartResponseDTO>> getAllCarts() {
-//        return cartsRepository.findAll()
-//                .stream()
-//                .map(cartResponseDTOMapper)
-//                .toList();
-//    }
 
 
     public CartResponseDTO getCartById(int cartId) {
@@ -82,14 +73,10 @@ public class CartsService {
                     return cartsRepository.save(newCart);
                 });
         cartItem.setCartId(cart.getCartId());
-
         cart.getItems().add(cartItem);
-
         cartItemRepository.save(cartItem);
         cartsRepository.save(cart);
     }
-
-
 
 
     public void removeItemFromCart(int customerId, int itemId) {
