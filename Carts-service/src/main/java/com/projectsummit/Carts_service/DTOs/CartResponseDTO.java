@@ -5,6 +5,6 @@ import java.util.List;
 public record CartResponseDTO(
         int cartId,
         int customerId,
-        List<CartItemResponseDTO> cartItems
+        List<CartItemDTO> cartItems
 ) {
 }

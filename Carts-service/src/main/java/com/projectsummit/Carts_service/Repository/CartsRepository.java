@@ -13,6 +13,7 @@ public interface CartsRepository
         extends JpaRepository<Cart, Long> {
 
     Collection<Object> findByCartId(int cartId);
+//    Cart findByCustomerIdAndStatus(int customerId, String status);
     Optional<Cart> findByCustomerIdAndStatus(int customerId, String status);
 }
 
