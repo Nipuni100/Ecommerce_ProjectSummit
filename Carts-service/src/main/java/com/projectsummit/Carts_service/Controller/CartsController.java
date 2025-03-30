@@ -25,18 +25,20 @@ public class CartsController {
         this.cartsService = cartsService;
     }
 
+//    Get all carts
     @GetMapping
     public ResponseEntity<List<CartResponseDTO>> getAllCarts() {
         List<CartResponseDTO> carts = cartsService.getAllCarts();
         return ResponseEntity.ok(carts);
     }
 
-
+// Get the cart by cart ID
     @GetMapping("/{cartId}")
     public ResponseEntity<CartResponseDTO> getCartById(@PathVariable int cartId) {
         return ResponseEntity.ok(cartsService.getCartById(cartId));
     }
 
+//    Get the customer's cart
     @GetMapping("/customers/{customerId}")
     public ResponseEntity<CartResponseDTO> getCartByCustomerId(@PathVariable int customerId) {
         CartResponseDTO cartResponse = cartsService.getCartByCustomerId(customerId);
@@ -47,12 +49,14 @@ public class CartsController {
     }
 
 
+//    Add an item to cart
     @PostMapping("/customers/{customerId}/items")
     public ResponseEntity<String> addItemToCart(@RequestBody CartItem cartItem, @PathVariable int customerId) {
         cartsService.addItemToCart(cartItem, customerId);
         return ResponseEntity.ok("Item added to cart successfully");
     }
 
+//    Remove an item from the cart
     @DeleteMapping("/customers/{customerId}/items/{itemId}")
     public ResponseEntity<String> removeItemFromCart(
             @PathVariable int customerId,
@@ -61,6 +65,7 @@ public class CartsController {
         return ResponseEntity.ok("Item removed from cart successfully");
     }
 
+//    Increase or decrease the quantity of an item
     @PatchMapping("/customers/{customerId}/items/{itemId}")
     public ResponseEntity<CartItem> updateItemQuantity(
             @PathVariable int customerId,
@@ -75,6 +80,7 @@ public class CartsController {
                 : ResponseEntity.notFound().build();
     }
 
+//    Empty the cart
     @DeleteMapping("/customers/{customerId}/empty")
     public ResponseEntity<String> emptyCart(@PathVariable int customerId) {
         cartsService.emptyCart(customerId);
