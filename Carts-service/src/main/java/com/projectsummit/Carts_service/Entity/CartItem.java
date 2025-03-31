@@ -6,7 +6,7 @@ import lombok.Setter;
 
 
 @Entity
-@Table
+@Table(name="cart_item")
 @Setter
 @Getter
 public class CartItem {
@@ -15,12 +15,16 @@ public class CartItem {
             strategy = GenerationType.IDENTITY
     )
     private int cartItemId;
+//    @Column(name = "cart_id", nullable = false)
     private int cartId;
     private String prodName;
     private Float price;
     private String brand;
     private int quantity;
     private String status;
+//    @ManyToOne
+//    @JoinColumn(name = "cart_id", nullable = false)
+//    private Cart cart;
 
     public CartItem() {
     }
