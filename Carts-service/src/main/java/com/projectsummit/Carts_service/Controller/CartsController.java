@@ -1,10 +1,11 @@
 package com.projectsummit.Carts_service.Controller;
 
 
-import com.projectsummit.Carts_service.DTOs.CartItemQuantityDTO;
-import com.projectsummit.Carts_service.DTOs.CartResponseDTO;
+import com.projectsummit.Carts_service.DTOs.*;
 import com.projectsummit.Carts_service.Entity.CartItem;
 import com.projectsummit.Carts_service.Entity.Cart;
+import com.projectsummit.Carts_service.Entity.Order;
+import com.projectsummit.Carts_service.ExceptionHandling.ResourceNotFoundException;
 import com.projectsummit.Carts_service.Service.CartsService;
 import jakarta.websocket.server.PathParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,54 @@ public class CartsController {
     public ResponseEntity<String> emptyCart(@PathVariable int customerId) {
         cartsService.emptyCart(customerId);
         return ResponseEntity.ok("Cart emptied successfully.");
+    }
+
+
+    //Get all orders
+    @GetMapping("/orders")
+    public ResponseEntity<List <OrderResponseDTO>> getAllOrders() {
+        List<OrderResponseDTO> orders = cartsService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
+
+    //Get order by customerID
+    @GetMapping("/orders/customers/{customerId}")
+    public ResponseEntity<OrderResponseDTO> getOrderByCustomerId(@PathVariable int customerId) {
+        OrderResponseDTO orderResponseDTO = cartsService.getOrderByCustomerId(customerId);
+
+        if (orderResponseDTO != null) {
+            return ResponseEntity.ok(orderResponseDTO);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    //Cancel an order
+    @PatchMapping("/orders/{orderId}")
+    public ResponseEntity<String> cancelOrder(@PathVariable int orderId, @RequestBody OrderStatusDTO orderStatusDTO) {
+        try {
+            cartsService.cancelOrder(orderId);
+            return ResponseEntity.status(HttpStatus.OK).body("Order status updated successfully to " + orderStatusDTO.status());
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        }
+    }
+
+    // Place an order
+    @PostMapping("/orders/{cartId}")
+    public ResponseEntity<OrderResponseDTO> createOrder(
+            @PathVariable int cartId,
+            @RequestBody OrderRequestDTO orderRequestDTO) {
+        OrderResponseDTO responseDTO = cartsService.createOrder(
+                cartId,
+                orderRequestDTO.paymentMethod(),
+                orderRequestDTO.orderStatus(),
+                orderRequestDTO.cartItemIds()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
 
