@@ -14,52 +14,63 @@ import com.projectSummit.product_service.Repository.CategoryRepository;
 import com.projectSummit.product_service.Repository.ProductsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+
+
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
-public class ProductsService implements ProductsServiceInterface {
+public class ImplProductsService implements ProductsServiceInterface {
     private final ProductsRepository productsRepository;
     private final CategoryRepository categoryRepository;
     private final ProductResponseDTOMapper productResponseDTOMapper;
     private final ProductRequestDTOMapper productRequestDTOMapper;
     private final CategoryResponseDTOMapper categoryResponseDTOMapper;
 
+    private static final Logger logger = LoggerFactory.getLogger(ImplProductsService.class);
     //Methods
 
-    public List<ProductResponseDTO> getProducts(String type, String searchQuery) {
-        List<Product> products;
-        if ("product".equalsIgnoreCase(type)) {
-            products = productsRepository.findByProdName(searchQuery);
-        } else if ("category".equalsIgnoreCase(type)) {
-            Category category = categoryRepository.findByCategoryName(searchQuery);  //Return CategoryId
-            if (category != null) {
-                int categoryId = category.getCategoryId();
-                products = productsRepository.findByCategoryId(categoryId); // Fetch products using categoryId
-            } else {
-                products = new ArrayList<>();
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid search type. Use 'product' or 'category'.");
+    public Page<ProductResponseDTO> getProducts(String type, String searchQuery, Pageable pageable) {
+        if (searchQuery == null || searchQuery.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search query cannot be empty.");
         }
 
-        return products
-                .stream()
-                .map(productResponseDTOMapper)
-                .collect(Collectors.toList());
+        Page<Product> productsPage;
+
+        logger.info("Searching by : " + type + " " + searchQuery);
+
+        if ("product".equalsIgnoreCase(type)) {
+            productsPage = productsRepository.findByProdNameContainingIgnoreCase(searchQuery, pageable);
+        } else if ("category".equalsIgnoreCase(type)) {
+            Category category = categoryRepository.findByCategoryName(searchQuery);
+            if (category != null) {
+                productsPage = productsRepository.findByCategoryId(category.getCategoryId(), pageable);
+            } else {
+                productsPage = Page.empty(pageable); // Return empty page
+            }
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid search type. Use 'product' or 'category'.");
+        }
+        return productsPage.map(productResponseDTOMapper);
     }
 
 
-    public Product getProductById(int prodId) {
-        return productsRepository.findById((long)prodId)
+    public ProductResponseDTO getProductById(int prodId) {
+        Product product = productsRepository.findById((long) prodId)
                 .orElseThrow(() -> new NoSuchElementException("Product with ID " + prodId + " not found"));
+
+        return productResponseDTOMapper.apply(product); // Assuming your mapper is a Function<Product, ProductResponseDTO>
     }
+
 
     public void removeProduct(int prodId) {
         boolean exists = productsRepository.existsById((long)prodId);
@@ -71,12 +82,28 @@ public class ProductsService implements ProductsServiceInterface {
     }
 
 
-    public ProductResponseDTO addProduct(ProductRequestDTO productRequestDTO) {
-        Product product = productRequestDTOMapper.apply(productRequestDTO);
-        Product savedProduct = productsRepository.save(product);
-        return productResponseDTOMapper.apply(savedProduct);
-    }
+public ProductResponseDTO addProduct(ProductRequestDTO productRequestDTO) {
+    // Validate category existence
+    Category category = categoryRepository.findById((long)productRequestDTO.categoryId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Category not found with ID: " + productRequestDTO.categoryId()));
 
+    // Map DTO to Entity
+    Product product = new Product();
+    product.setProdName(productRequestDTO.prodName());
+    product.setBrand(productRequestDTO.brand());
+    product.setCategoryId(category.getCategoryId());
+    product.setSupplierId(productRequestDTO.supplierId());  // No need for supplier validation
+    product.setPrice(productRequestDTO.price());
+    product.setStatus(productRequestDTO.status());
+    product.setStockCount(productRequestDTO.stockCount());
+
+    // Save the product
+    Product savedProduct = productsRepository.save(product);
+
+    // Convert to Response DTO
+    return productResponseDTOMapper.apply(savedProduct);
+}
 
     public Product updateProductStatus(int prodId, String status) {
         Optional<Product> optionalProduct = productsRepository.findById((long)prodId);
@@ -88,13 +115,11 @@ public class ProductsService implements ProductsServiceInterface {
         return null;
     }
 
-    public List<CategoryResponseDTO> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
-        return categories.stream()
-                .map(categoryResponseDTOMapper)
-                .collect(Collectors.toList());
-    }
 
+    public Page<CategoryResponseDTO> getAllCategories(Pageable pageable) {
+        Page<Category> categories = categoryRepository.findAll(pageable);
+        return categories.map(categoryResponseDTOMapper); // If this is a Function<Category, CategoryResponseDTO>
+    }
 
     public CategoryResponseDTO getCategoryById(int categoryId)
     {
@@ -111,7 +136,7 @@ public class ProductsService implements ProductsServiceInterface {
     }
 
     public boolean deleteCategory(int categoryId) {
-        if (categoryRepository.existsById(categoryId)) {
+        if (categoryRepository.existsById((long)categoryId)) {
             categoryRepository.deleteById((long)categoryId);
             return true;
         } else {
@@ -135,5 +160,11 @@ public class ProductsService implements ProductsServiceInterface {
         }
     }
 
+    public boolean existsById(int categoryId) {
+        return categoryRepository.existsById((long)categoryId);
+    }
 
+    public boolean categoryExistsByName(String categoryName) {
+        return categoryRepository.existsBycategoryNameIgnoreCase(categoryName);
+    }
 }
