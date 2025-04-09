@@ -10,13 +10,15 @@ import org.springframework.lang.Nullable;
 public record ProductResponseDTO (
         @NonNull
         int prodId,
+        int categoryId,
         String prodName,
         Float price,
         @Nullable
         int stockCount
 ){
-        public ProductResponseDTO(int prodId, String prodName, Float price, int stockCount) {
+        public ProductResponseDTO(int prodId, int categoryId, String prodName, Float price, int stockCount) {
                 this.prodId = prodId;
+                this.categoryId = categoryId;
                 this.prodName = prodName;
                 this.price = price;
                 this.stockCount = stockCount;

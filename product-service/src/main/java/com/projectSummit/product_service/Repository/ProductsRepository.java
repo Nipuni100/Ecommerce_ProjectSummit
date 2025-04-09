@@ -20,9 +20,9 @@ public interface ProductsRepository
 
 //    List<Product> findByCategory(String categoryName);
 
-    List<Product> findByCategoryId(int categoryId);
+    Page<Product> findByProdNameContainingIgnoreCase(String prodName, Pageable pageable);
 
-
+    Page<Product> findByCategoryId(int categoryId, Pageable pageable);
 }
 
 

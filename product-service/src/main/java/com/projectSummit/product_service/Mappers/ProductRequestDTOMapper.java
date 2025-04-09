@@ -15,8 +15,12 @@ public class ProductRequestDTOMapper implements Function<ProductRequestDTO, Prod
                 dto.prodId(),
                 dto.prodName(),
                 dto.brand(),
+                dto.categoryId(),
+                dto.supplierId(),
+                dto.price(),
                 dto.stockCount(),
-                dto.price()
+                dto.status()
+
         );
 
     }

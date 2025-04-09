@@ -8,8 +8,11 @@ public record ProductRequestDTO (
         int prodId,
         String prodName,
         String brand,
+        int categoryId,
+        int supplierId,
         Float price,
         @Nullable
-        int stockCount
+        int stockCount,
+        String status
 
 ){}

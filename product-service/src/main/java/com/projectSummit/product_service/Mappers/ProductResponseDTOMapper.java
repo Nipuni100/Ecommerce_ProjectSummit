@@ -12,6 +12,7 @@ public class ProductResponseDTOMapper implements Function<Product , ProductRespo
     public ProductResponseDTO apply(Product product) {
         return new ProductResponseDTO(
                 product.getProdId(),
+                product.getCategoryId(),
                 product.getProdName(),
                 product.getPrice(),
                 product.getStockCount())
