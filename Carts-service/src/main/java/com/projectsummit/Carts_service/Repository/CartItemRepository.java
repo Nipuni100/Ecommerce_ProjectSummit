@@ -17,6 +17,10 @@ import java.util.*;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByCartId(int cartId);
-
+//    Optional<Object> findByCartIdAndProdId(int cartId, int prodId);
+    Optional<CartItem> findByCartIdAndProdId(int cartId, int prodId);
 }
+
+
+
 

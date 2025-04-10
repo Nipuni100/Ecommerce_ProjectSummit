@@ -14,8 +14,11 @@ public class CategoryRequestDTOMapper implements Function<Product , ProductReque
                 product.getProdId(),
                 product.getProdName(),
                 product.getBrand(),
+                product.getCategoryId(),
+                product.getSupplierId(),
                 product.getPrice(),
-                product.getStockCount()
+                product.getStockCount(),
+                product.getStatus()
                 )
                 ;
 

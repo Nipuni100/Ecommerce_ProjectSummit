@@ -10,14 +10,15 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
-@Table(name="orders")
-public class Order {
+@Table
+public class Orders {
     @Id
     @GeneratedValue(
             strategy = GenerationType.IDENTITY
     )
 
     private int orderId;
+    private int cartId;
     private int customerId;
     private String paymentMethod;
     private int numOfItems;
@@ -27,26 +28,36 @@ public class Order {
     @OneToMany(mappedBy = "orderId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> itemsList = new ArrayList<>();
 
-    public Order() {
+    public Orders() {
     }
 
-    public Order(int orderId, int customerId, String paymentMethod, int numOfItems, Float totalPrice, String orderStatus, List<OrderItem> itemsList) {
+    public Orders(int cartId, int customerId, String paymentMethod, int numOfItems, Float totalPrice, String orderStatus, List<OrderItem> itemsList) {
+        this.cartId = cartId;
+        this.customerId = customerId;
+        this.paymentMethod = paymentMethod;
+        this.numOfItems = numOfItems;
+        this.totalPrice = totalPrice;
+        this.orderStatus = orderStatus;
+        this.itemsList = itemsList;
+    }
+
+    public Orders(int orderId, int cartId, int customerId, String paymentMethod, int numOfItems, String orderStatus, Float totalPrice, List<OrderItem> itemsList) {
         this.orderId = orderId;
+        this.cartId = cartId;
         this.customerId = customerId;
         this.paymentMethod = paymentMethod;
         this.numOfItems = numOfItems;
-        this.totalPrice = totalPrice;
         this.orderStatus = orderStatus;
+        this.totalPrice = totalPrice;
         this.itemsList = itemsList;
     }
 
-    public Order(int customerId, String paymentMethod, int numOfItems, Float totalPrice, String orderStatus, List<OrderItem> itemsList) {
-        this.customerId = customerId;
-        this.paymentMethod = paymentMethod;
-        this.numOfItems = numOfItems;
-        this.totalPrice = totalPrice;
-        this.orderStatus = orderStatus;
-        this.itemsList = itemsList;
+    public int getCartId() {
+        return cartId;
+    }
+
+    public void setCartId(int cartId) {
+        this.cartId = cartId;
     }
 
     public int getOrderId() {
@@ -105,5 +116,3 @@ public class Order {
         this.itemsList = itemsList;
     }
 }
-
-

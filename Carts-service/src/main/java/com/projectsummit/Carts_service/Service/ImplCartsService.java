@@ -4,7 +4,7 @@ import com.projectsummit.Carts_service.DTOs.*;
 import com.projectsummit.Carts_service.Entity.CartItem;
 import com.projectsummit.Carts_service.Entity.Cart;
 import com.projectsummit.Carts_service.ExceptionHandling.ResourceNotFoundException;
-import com.projectsummit.Carts_service.Mappers.CartItemResponseDTOMapper;
+//import com.projectsummit.Carts_service.Mappers.CartItemResponseDTOMapper;
 import com.projectsummit.Carts_service.Repository.CartItemRepository;
 import com.projectsummit.Carts_service.Repository.CartsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,17 +13,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 @Service
 public class ImplCartsService implements CartsService {
     private final CartItemRepository cartItemRepository;
     private CartsRepository cartsRepository;
-    private CartItemResponseDTOMapper cartItemResponseDTOMapper;
+//    private CartItemResponseDTOMapper cartItemResponseDTOMapper;
     private static final Logger logger = LoggerFactory.getLogger(ImplCartsService.class);
 
     @Autowired
@@ -31,7 +29,6 @@ public class ImplCartsService implements CartsService {
                         CartItemRepository cartItemRepository) {
         this.cartsRepository = cartsRepository;
         this.cartItemRepository = cartItemRepository;
-
     }
 
     // CARTS METHODS
@@ -42,25 +39,44 @@ public class ImplCartsService implements CartsService {
         return mapToCartResponseDTO(cart, cartItems);
     }
 
-
     public CartResponseDTO getCartByCustomerId(int customerId) {
-        Cart cart = cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE")
-                .orElseThrow(() -> new ResourceNotFoundException("Active cart not found for customer ID: " + customerId));
+        logger.info("Fetching active cart for customer ID: {}", customerId);
 
-        List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getCartId());
-        return mapToCartResponseDTO(cart, cartItems);
+        try{
+            Cart cart = cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE")
+                    .orElseThrow(() -> {
+                        logger.warn("No active cart found for customer ID: {}", customerId);
+                        return new ResourceNotFoundException("Active cart not found for customer ID: " + customerId);
+                    });
+            logger.info("Active cart found for customer ID: {}. Cart ID: {}", customerId, cart.getCartId());
+
+            List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getCartId());
+            logger.info("Retrieved {} items for cart ID: {}", cartItems.size(), cart.getCartId());
+            return mapToCartResponseDTO(cart, cartItems);
     }
+        catch (ResourceNotFoundException e) {
+            logger.error("Error while fetching cart for customer ID {}: {}", customerId, e.getMessage());
+            throw e;
+        }}
 
 
     public void addItemToCart(CartItemRequestDTO cartItemRequestDTO, int customerId) {
-        // Find or create an active cart
+        logger.info("Adding item to cart for customer ID: {}. Item details: {}", customerId, cartItemRequestDTO);
+
+        try{
         Cart cart = cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE")
                 .orElseGet(() -> {
+                            logger.info("No active cart found for customer ID: {}. Creating a new cart.", customerId);
                     Cart newCart = new Cart(customerId);
                     newCart.setStatus("ACTIVE");
-                    return cartsRepository.save(newCart);
+                    Cart savedCart = cartsRepository.save(newCart);
+                    logger.info("New active cart created with ID: {}", savedCart.getCartId());
+                    return savedCart;
                 });
-
+            if (cartItemRequestDTO.prodId() == 0) {
+                logger.error("Product ID is null in the request for customer ID: {}", customerId);
+                throw new IllegalArgumentException("Product ID cannot be null");
+            }
         // Convert DTO to entity
         CartItem cartItem = new CartItem();
         cartItem.setCartId(cart.getCartId());
@@ -75,29 +91,32 @@ public class ImplCartsService implements CartsService {
         cart.getItems().add(cartItem);
         cartItemRepository.save(cartItem);
         cartsRepository.save(cart);
+
+            logger.info("Item successfully added to cart with ID: {} for customer ID: {}", cart.getCartId(), customerId);
     }
+        catch (Exception e) {
+            logger.error("Unexpected error while adding item to cart for customer ID {}: {}", customerId, e.getMessage(), e);
+            throw new RuntimeException("Unexpected error occurred while adding item to cart.", e);
+        }
 
-
+    }
 
     public void removeItemFromCart(int customerId, int prodId) {
         Cart cart = cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE")
                 .orElseThrow(() -> new ResourceNotFoundException("Active cart not found for customer ID: " + customerId));
 
-        CartItem cartItem = cartItemRepository.findById((long) prodId)
-                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with ID: " + prodId));
+        CartItem cartItem = cartItemRepository.findByCartIdAndProdId(cart.getCartId(), prodId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Item with product ID " + prodId + " not found in customer's active cart."));
 
-        if (cartItem.getCartId() != (int) cart.getCartId()) {
-            throw new IllegalArgumentException("Item does not belong to the customer's active cart.");
-        }
         cartItemRepository.delete(cartItem);
     }
-
 
     public CartItem updateItemQuantity(int customerId, int prodId, int newQuantity) {
         Cart cart = cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE")
                 .orElseThrow(() -> new ResourceNotFoundException("Active cart not found for customer ID: " + customerId));
 
-        CartItem cartItem = cartItemRepository.findById((long) prodId)
+        CartItem cartItem = cartItemRepository.findByCartIdAndProdId(cart.getCartId(), prodId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found with ID: " + prodId));
 
         if (cartItem.getCartId() != cart.getCartId()) {
@@ -106,6 +125,7 @@ public class ImplCartsService implements CartsService {
         cartItem.setQuantity(newQuantity);
         return cartItemRepository.save(cartItem);
     }
+
 
     public void emptyCart(int customerId) {
         Optional<Cart> optionalCart = cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE");
@@ -119,6 +139,9 @@ public class ImplCartsService implements CartsService {
         }
     }
 
+    public boolean isCartExist(int customerId) {
+        return cartsRepository.findByCustomerIdAndStatus(customerId, "ACTIVE").isPresent();
+    }
     public Page<CartResponseDTO> getAllCarts(Pageable pageable) {
         Page<Cart> cartsPage = cartsRepository.findAll(pageable);
 
@@ -128,12 +151,15 @@ public class ImplCartsService implements CartsService {
         });
     }
 
-
     //MAPPERS
-
     private CartResponseDTO mapToCartResponseDTO(Cart cart, List<CartItem> cartItems) {
         List<CartItemDTO> cartItemDTOs = cartItems.stream()
-                .map(item -> new CartItemDTO(item.getCartItemId(), item.getProdName(), item.getPrice(), item.getQuantity()))
+                .map(item -> new CartItemDTO(
+                        item.getCartItemId(),
+                        item.getProdName(),
+                        item.getPrice(),
+                        item.getQuantity(),
+                        item.getProdId()))
                 .collect(Collectors.toList());
 
         return new CartResponseDTO(
@@ -141,8 +167,7 @@ public class ImplCartsService implements CartsService {
                 cart.getCustomerId(),
                 cartItemDTOs
         );
-    }
-
+     }
     }
 
 

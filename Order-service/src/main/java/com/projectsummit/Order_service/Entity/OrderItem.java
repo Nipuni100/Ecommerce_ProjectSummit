@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name="orderItems")
+@Table
 public class OrderItem {
     @Id
     @GeneratedValue(
@@ -18,24 +18,34 @@ public class OrderItem {
     private Float price;
     private int quantity;
     private int orderId;
+    private int prodId;
 
     public OrderItem() {
     }
 
-
-    public OrderItem(String prodName, Float price, int quantity, int orderId) {
-        this.prodName = prodName;
-        this.price = price;
-        this.quantity = quantity;
-        this.orderId = orderId;
-    }
-
-    public OrderItem(int orderItemId, String prodName, Float price, int quantity, int orderId) {
+    public OrderItem(int orderItemId, String prodName, Float price, int quantity, int orderId, int prodID) {
         this.orderItemId = orderItemId;
         this.prodName = prodName;
         this.price = price;
         this.quantity = quantity;
         this.orderId = orderId;
+        this.prodId = prodID;
+    }
+
+    public OrderItem(String prodName, Float price, int quantity, int orderId, int prodId) {
+        this.prodName = prodName;
+        this.price = price;
+        this.quantity = quantity;
+        this.orderId = orderId;
+        this.prodId = prodId;
+    }
+
+    public int getProdId() {
+        return prodId;
+    }
+
+    public void setProdID(int prodID) {
+        this.prodId = prodID;
     }
 
     public int getOrderItemId() {
@@ -78,3 +88,4 @@ public class OrderItem {
         this.orderId = orderId;
     }
 }
+

@@ -22,6 +22,7 @@ public class CartItem {
     private String brand;
     private int quantity;
     private String status;
+    private int prodId;
 //    @ManyToOne
 //    @JoinColumn(name = "cart_id", nullable = false)
 //    private Cart cart;
@@ -29,23 +30,25 @@ public class CartItem {
     public CartItem() {
     }
 
-    public CartItem(int cartId, String prodName, Float price, String brand, int quantity, String status) {
+    public CartItem(int cartId, String prodName, Float price, String brand, int quantity, String status, int prodId) {
         this.cartId = cartId;
         this.prodName = prodName;
         this.price = price;
         this.brand = brand;
         this.quantity = quantity;
         this.status = status;
+        this.prodId = prodId;
     }
 
-    public CartItem(int cartItemId, int cartId, Float price, String prodName, String brand, int quantity, String status) {
+    public CartItem(int cartItemId, int cartId, String prodName, Float price, String brand, int quantity, String status, int prodId) {
         this.cartItemId = cartItemId;
         this.cartId = cartId;
-        this.price = price;
         this.prodName = prodName;
+        this.price = price;
         this.brand = brand;
         this.quantity = quantity;
         this.status = status;
+        this.prodId = prodId;
     }
 
     public int getCartItemId() {
@@ -102,5 +105,13 @@ public class CartItem {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public int getProdId() {
+        return prodId;
+    }
+
+    public void setProdId(int prodId) {
+        this.prodId = prodId;
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface CategoryRepository
         extends JpaRepository<Category, Long> {
-    @Query("SELECT CASE WHEN COUNT(c) > 0 THEN TRUE ELSE FALSE END FROM Category c WHERE c.categoryId = :categoryId")
-    boolean existsById(@Param("categoryId") int categoryId);
-    Category findByCategoryName(String CategoryName);
+    Category findByCategoryName(String categoryName);
+    boolean existsBycategoryNameIgnoreCase(String categoryName);
 }
